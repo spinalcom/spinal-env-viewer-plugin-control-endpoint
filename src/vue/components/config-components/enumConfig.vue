@@ -114,13 +114,21 @@ export default {
   justify-content: space-around;
 }
 
-.config_container .colors .item .colorContainer {
-  /* display: flex;
-  flex-direction: column; */
-  /* justify-content: center; */
+.config_container .colorContainer {
+  width: 100%;
+  height: 30px;
 }
 
 .config_container .colorSelect {
   width: 100%;
+}
+
+.config_container .colorContainer .current-color {
+  width: 100%;
+  height: 80%;
+}
+
+.config_container .colorContainer .current-color:hover {
+  cursor: pointer;
 }
 </style>

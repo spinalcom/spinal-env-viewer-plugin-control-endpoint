@@ -152,4 +152,60 @@ export default {
 .config_container .values {
   height: 60%;
 }
+
+.config_container {
+  width: 90%;
+  height: 100%;
+  margin: auto;
+}
+
+.config_container .values {
+  height: 60%;
+}
+
+.config_container .colorSelect {
+  width: 100%;
+}
+
+.config_container .colorContainer {
+  width: 100%;
+  height: 30px;
+}
+
+.config_container .colorContainer .current-color {
+  width: 100%;
+  height: 80%;
+}
+
+.config_container .colorContainer .current-color:hover {
+  cursor: pointer;
+}
+
+.config_container .colorGradient {
+  width: 100%;
+  height: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 100px;
+}
+
+.config_container .colorGradient div {
+  flex-grow: 1;
+  position: relative;
+  text-align: center;
+  color: black;
+}
+
+.config_container .colorGradient div:hover {
+  cursor: pointer;
+}
+
+.colorGradient div:after {
+  content: attr(title);
+  position: absolute;
+  bottom: -15px;
+  font-family: monospace;
+  font-size: 12px;
+}
 </style>
