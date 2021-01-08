@@ -80,16 +80,20 @@ with this file. If not, see
           {{ item.type }}
         </md-table-cell>
 
+        <!-- <md-table-cell md-label="Endpoint Icon">
+          <md-icon :title="item.icon">{{item.icon}}</md-icon>
+        </md-table-cell> -->
+
         <md-table-cell md-label="Unit">
-          {{ item.unit }}
+          {{ item.unit || '-' }}
         </md-table-cell>
 
         <md-table-cell md-label="Command">
-          {{ boolValues[item.command] }}
+          {{ boolValues[item.command] || 'No' }}
         </md-table-cell>
 
         <md-table-cell md-label="Save TimeSeries">
-          {{ boolValues[item.saveTimeSeries] }}
+          {{ boolValues[item.saveTimeSeries] || 'No' }}
         </md-table-cell>
 
         <!-- <md-table-cell>
@@ -164,6 +168,21 @@ with this file. If not, see
             </md-select>
           </md-field>
         </md-table-cell>
+
+        <!-- <md-table-cell md-label="Endpoint Icon">
+          <md-menu md-size="small">
+            <md-button md-menu-trigger>
+              <md-icon :title="item.icon">{{item.icon}}</md-icon>
+              <md-icon>arrow_drop_down</md-icon>
+            </md-button>
+
+            <md-menu-content>
+              <md-menu-item>My Item 1</md-menu-item>
+              <md-menu-item>My Item 2</md-menu-item>
+              <md-menu-item>My Item 3</md-menu-item>
+            </md-menu-content>
+          </md-menu>
+        </md-table-cell> -->
 
         <md-table-cell class="tableCell"
                        md-label="Unit">
