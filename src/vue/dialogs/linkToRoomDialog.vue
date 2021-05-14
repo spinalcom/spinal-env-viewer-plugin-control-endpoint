@@ -23,56 +23,70 @@ with this file. If not, see
 -->
 
 <template>
-  <md-dialog class="mdDialogContainer"
-             :md-active.sync="showDialog"
-             @md-closed="closeDialog(false)">
-    <md-dialog-title class="dialogTitle">Manage {{type}} Group</md-dialog-title>
-    <md-dialog-content class="content">
+   <md-dialog
+      class="mdDialogContainer"
+      :md-active.sync="showDialog"
+      @md-closed="closeDialog(false)"
+   >
+      <md-dialog-title class="dialogTitle">Manage {{type}} Group</md-dialog-title>
+      <md-dialog-content class="content">
 
-      <div class="section">
-        <link-template :title="'Contexts'"
-                       :data="data"
-                       :itemSelected="contextSelected"
-                       @create="createContext"
-                       @select="selectContext"></link-template>
-      </div>
+         <div class="section">
+            <link-template
+               :title="'Contexts'"
+               :data="data"
+               :itemSelected="contextSelected"
+               @create="createContext"
+               @select="selectContext"
+            ></link-template>
+         </div>
 
-      <div class="section">
-        <link-template :title="'Categories'"
-                       :data="categories"
-                       :itemSelected="categorySelected"
-                       @create="createCategory"
-                       @select="selectCategory"
-                       :disableBtn="!contextSelected"></link-template>
+         <div class="section">
+            <link-template
+               :title="'Categories'"
+               :data="categories"
+               :itemSelected="categorySelected"
+               @create="createCategory"
+               @select="selectCategory"
+               :disableBtn="!contextSelected"
+            ></link-template>
 
-      </div>
+         </div>
 
-      <div class="section">
-        <link-template :title="'Groups'"
-                       :data="groups"
-                       :itemSelected="groupSelected"
-                       @create="createGroup"
-                       @select="selectGroup"
-                       :disableBtn="!categorySelected"></link-template>
-      </div>
+         <div class="section">
+            <link-template
+               :title="'Groups'"
+               :data="groups"
+               :itemSelected="groupSelected"
+               @create="createGroup"
+               @select="selectGroup"
+               :disableBtn="!categorySelected"
+            ></link-template>
+         </div>
 
-      <div class="section">
-        <link-template :title="'Control Points'"
-                       :data="controlPoints"
-                       :itemSelected="controlPointSelected"
-                       @create="createGroup"
-                       @select="selectControlPoint"
-                       :disableBtn="!categorySelected"></link-template>
-      </div>
-    </md-dialog-content>
-    <md-dialog-actions>
-      <md-button class="md-primary"
-                 @click="closeDialog(false)">Close</md-button>
-      <md-button class="md-primary"
-                 :disabled="disabled()"
-                 @click="closeDialog(true)">Save</md-button>
-    </md-dialog-actions>
-  </md-dialog>
+         <div class="section">
+            <link-template
+               :title="'Control Points'"
+               :data="controlPoints"
+               :itemSelected="controlPointSelected"
+               @create="createGroup"
+               @select="selectControlPoint"
+               :disableBtn="!categorySelected"
+            ></link-template>
+         </div>
+      </md-dialog-content>
+      <md-dialog-actions>
+         <md-button
+            class="md-primary"
+            @click="closeDialog(false)"
+         >Close</md-button>
+         <md-button
+            class="md-primary"
+            :disabled="disabled()"
+            @click="closeDialog(true)"
+         >Save</md-button>
+      </md-dialog-actions>
+   </md-dialog>
 
 </template>
 
@@ -87,265 +101,298 @@ import LinkToGroupTemplate from "../components/linkTogroupTemplate.vue";
 import { spinalControlPointService } from "spinal-env-viewer-plugin-control-endpoint-service";
 
 export default {
-  name: "dialogComponent",
-  components: {
-    "link-template": LinkToGroupTemplate,
-  },
-  props: ["onFinised"],
-  data() {
-    this.contextId;
-    this.nodeId;
+   name: "dialogComponent",
+   components: {
+      "link-template": LinkToGroupTemplate,
+   },
+   props: ["onFinised"],
+   data() {
+      this.contextId;
+      this.nodeId;
 
-    return {
-      showDialog: true,
-      data: [],
-      groups: [],
-      categories: [],
-      controlPoints: [],
-      contextSelected: undefined,
-      categorySelected: undefined,
-      groupSelected: undefined,
-      controlPointSelected: undefined,
-      items: [],
-      type: undefined,
-      callback: undefined,
-    };
-  },
+      return {
+         showDialog: true,
+         data: [],
+         groups: [],
+         categories: [],
+         controlPoints: [],
+         contextSelected: undefined,
+         categorySelected: undefined,
+         groupSelected: undefined,
+         controlPointSelected: undefined,
+         items: [],
+         type: undefined,
+         callback: undefined,
+      };
+   },
 
-  mounted() {
-    EventBus.$on("itemCreated", (id) => {
-      this.getAllData();
-    });
-  },
-
-  methods: {
-    async opened(option) {
-      // this.items = option.itemSelected;
-      this.contextId = option.contextId;
-      this.nodeId = option.nodeId;
-
-      this.type = option.type;
-      this.callback = option.callback;
-
-      await this.getAllData();
-
-      // console.log(this.data);
-    },
-
-    async removed(option) {
-      if (option) {
-        // this.items.forEach((el) => {
-        //   attributeService.linkItem(
-        //     this.contextSelected,
-        //     this.groupSelected,
-        //     el.id
-        //   );
-        // });
-
-        await spinalControlPointService.linkControlPointToRooms(
-          this.nodeId,
-          this.contextSelected,
-          this.controlPointSelected
-        );
-
-        if (typeof this.callback !== "undefined") {
-          const context = this.data.find(
-            (el) => el.id === this.contextSelected
-          );
-          const category = this.categories.find(
-            (el) => el.id === this.categorySelected
-          );
-          const group = this.groups.find((el) => el.id === this.groupSelected);
-
-          this.callback(context, category, group);
-        }
-      }
-      this.showDialog = false;
-    },
-
-    closeDialog(closeResult) {
-      if (typeof this.onFinised === "function") {
-        this.onFinised(closeResult);
-      }
-    },
-
-    getAllData() {
-      return attributeService.getAllGroupContext(this.type).then((res) => {
-        this.data = res;
-        this.updateCategory();
-        this.updateGroups();
-        this.updateControlPoints();
+   mounted() {
+      EventBus.$on("itemCreated", (id) => {
+         this.getAllData();
       });
-    },
+   },
 
-    // getCategories() {
-    //   this.categorySelected = undefined;
+   methods: {
+      async opened(option) {
+         // this.items = option.itemSelected;
+         this.contextId = option.contextId;
+         this.nodeId = option.nodeId;
 
-    //   if (this.contextSelected) {
-    //     let val = this.data.find(el => el.id === this.contextSelected);
-    //     if (val) return val.category;
-    //   }
-    //   return [];
-    // },
-    getGroups() {
-      this.groupSelected = undefined;
+         this.type = option.type;
+         this.callback = option.callback;
 
-      if (this.contextSelected && this.categorySelected) {
-        let context = this.data.find((el) => el.id === this.contextSelected);
-        if (context) {
-          let category = context.category.find(
-            (el) => el.id == this.categorySelected
-          );
+         await this.getAllData();
 
-          if (category) return category.groups;
-        }
-      }
-      return [];
-    },
+         // console.log(this.data);
+      },
 
-    disabled() {
-      return !(
-        this.contextSelected &&
-        this.categorySelected &&
-        this.groupSelected &&
-        this.controlPointSelected
-      );
-    },
+      async removed(option) {
+         if (option) {
+            // this.items.forEach((el) => {
+            //   attributeService.linkItem(
+            //     this.contextSelected,
+            //     this.groupSelected,
+            //     el.id
+            //   );
+            // });
 
-    createContext() {
-      spinalPanelManagerService.openPanel("createGroupContextDialog", {
-        title: "Create a Grouping Context",
-        typePreselected: this.type,
-        callback: (id) => (this.contextSelected = id),
-      });
-    },
+            await spinalControlPointService.linkControlPointToRooms(
+               this.nodeId,
+               this.contextSelected,
+               this.controlPointSelected
+            );
 
-    createCategory() {
-      spinalPanelManagerService.openPanel("createCategoryDialog", {
-        title: "add Category",
-        contextId: this.contextSelected,
-        selectedNode: SpinalGraphService.getInfo(this.contextSelected),
-        callback: (id) => (this.categorySelected = id),
-      });
-    },
+            if (typeof this.callback !== "undefined") {
+               const context = this.data.find(
+                  (el) => el.id === this.contextSelected
+               );
+               const category = this.categories.find(
+                  (el) => el.id === this.categorySelected
+               );
+               const group = this.groups.find(
+                  (el) => el.id === this.groupSelected
+               );
 
-    createGroup() {
-      spinalPanelManagerService.openPanel("createGroupDialog", {
-        title: "add Group",
-        contextId: this.contextSelected,
-        selectedNode: SpinalGraphService.getInfo(this.categorySelected),
-        callback: (id) => (this.groupSelected = id),
-      });
-    },
+               this.callback(context, category, group);
+            }
+         }
+         this.showDialog = false;
+      },
 
-    //////////////////////////////////////////////////////////////////
-    // Updates
-    //////////////////////////////////////////////////////////////////
+      closeDialog(closeResult) {
+         if (typeof this.onFinised === "function") {
+            this.onFinised(closeResult);
+         }
+      },
 
-    updateCategory() {
-      // this.categorySelected = undefined;
-      this.categories = [];
-      if (this.contextSelected) {
-        let val = this.data.find((el) => el.id === this.contextSelected);
-        if (val) this.categories = val.category;
-      }
-    },
+      getAllData() {
+         return attributeService.getAllGroupContext(this.type).then((res) => {
+            this.data = res;
+            this.updateCategory();
+            this.updateGroups();
+            this.updateControlPoints();
+         });
+      },
 
-    updateGroups() {
-      // this.groupSelected = undefined;
-      this.groups = [];
-      if (this.contextSelected && this.categorySelected) {
-        let context = this.data.find((el) => el.id === this.contextSelected);
-        if (context) {
-          let category = context.category.find(
-            (el) => el.id == this.categorySelected
-          );
+      // getCategories() {
+      //   this.categorySelected = undefined;
 
-          if (category) this.groups = category.groups;
-        }
-      }
-    },
+      //   if (this.contextSelected) {
+      //     let val = this.data.find(el => el.id === this.contextSelected);
+      //     if (val) return val.category;
+      //   }
+      //   return [];
+      // },
+      getGroups() {
+         this.groupSelected = undefined;
 
-    async updateControlPoints() {
-      this.controlPoints = [];
-      if (this.contextSelected && this.categorySelected && this.groupSelected) {
-        const res = await spinalControlPointService.getControlPoint(
-          this.groupSelected
-        );
-        this.controlPoints = res.map((el) => el.get());
-      }
-    },
+         if (this.contextSelected && this.categorySelected) {
+            let context = this.data.find(
+               (el) => el.id === this.contextSelected
+            );
+            if (context) {
+               let category = context.category.find(
+                  (el) => el.id == this.categorySelected
+               );
 
-    //////////////////////////////////////////////////////////////////
-    // Select
-    //////////////////////////////////////////////////////////////////
+               if (category) return category.groups;
+            }
+         }
+         return [];
+      },
 
-    selectContext(id) {
-      this.contextSelected = id;
-    },
+      disabled() {
+         return !(
+            this.contextSelected &&
+            this.categorySelected &&
+            this.groupSelected &&
+            this.controlPointSelected
+         );
+      },
 
-    selectCategory(id) {
-      this.categorySelected = id;
-    },
+      createContext() {
+         spinalPanelManagerService.openPanel("createGroupContextDialog", {
+            title: "Create a Grouping Context",
+            typePreselected: this.type,
+            callback: (id) => (this.contextSelected = id),
+         });
+      },
 
-    selectGroup(id) {
-      this.groupSelected = id;
-    },
+      createCategory() {
+         spinalPanelManagerService.openPanel("createCategoryDialog", {
+            title: "add Category",
+            contextId: this.contextSelected,
+            selectedNode: SpinalGraphService.getInfo(this.contextSelected),
+            callback: (id) => (this.categorySelected = id),
+         });
+      },
 
-    selectControlPoint(id) {
-      this.controlPointSelected = id;
-    },
-  },
-  watch: {
-    contextSelected() {
-      this.categorySelected = undefined;
-      this.groupSelected = undefined;
+      createGroup() {
+         spinalPanelManagerService.openPanel("createGroupDialog", {
+            title: "add Group",
+            contextId: this.contextSelected,
+            selectedNode: SpinalGraphService.getInfo(this.categorySelected),
+            callback: (id) => (this.groupSelected = id),
+         });
+      },
 
-      this.updateCategory();
-      this.updateGroups();
-      this.updateControlPoints();
-    },
+      //////////////////////////////////////////////////////////////////
+      // Updates
+      //////////////////////////////////////////////////////////////////
 
-    categorySelected() {
-      this.groupSelected = undefined;
+      updateCategory() {
+         // this.categorySelected = undefined;
+         this.categories = [];
+         if (this.contextSelected) {
+            let val = this.data.find((el) => el.id === this.contextSelected);
+            if (val) this.categories = val.category;
+         }
+      },
 
-      this.updateGroups();
-      this.updateControlPoints();
-    },
+      updateGroups() {
+         // this.groupSelected = undefined;
+         this.groups = [];
+         if (this.contextSelected && this.categorySelected) {
+            let context = this.data.find(
+               (el) => el.id === this.contextSelected
+            );
+            if (context) {
+               let category = context.category.find(
+                  (el) => el.id == this.categorySelected
+               );
 
-    groupSelected() {
-      this.controlPointSelected = undefined;
-      this.updateControlPoints();
-    },
-  },
+               if (category) this.groups = category.groups;
+            }
+         }
+      },
+
+      async updateControlPoints() {
+         this.controlPoints = [];
+         if (
+            this.contextSelected &&
+            this.categorySelected &&
+            this.groupSelected
+         ) {
+            const res = await spinalControlPointService.getControlPoint(
+               this.groupSelected
+            );
+            this.controlPoints = res.map((el) => el.get());
+         }
+      },
+
+      //////////////////////////////////////////////////////////////////
+      // Select
+      //////////////////////////////////////////////////////////////////
+
+      selectContext(id) {
+         if (this.contextSelected === id) {
+            this.contextSelected = undefined;
+            return;
+         }
+         this.contextSelected = id;
+      },
+
+      selectCategory(id) {
+         if (this.categorySelected === id) {
+            this.categorySelected = undefined;
+            return;
+         }
+         this.categorySelected = id;
+      },
+
+      selectGroup(id) {
+         if (this.groupSelected === id) {
+            this.groupSelected = undefined;
+            return;
+         }
+         this.groupSelected = id;
+      },
+
+      selectControlPoint(id) {
+         if (this.controlPointSelected === id) {
+            this.controlPointSelected = undefined;
+            return;
+         }
+         this.controlPointSelected = id;
+      },
+   },
+   watch: {
+      contextSelected() {
+         this.categorySelected = undefined;
+         this.groupSelected = undefined;
+
+         this.updateCategory();
+         this.updateGroups();
+         this.updateControlPoints();
+      },
+
+      categorySelected() {
+         this.groupSelected = undefined;
+
+         this.updateGroups();
+         this.updateControlPoints();
+      },
+
+      groupSelected() {
+         this.controlPointSelected = undefined;
+         this.updateControlPoints();
+      },
+   },
 };
 </script>
 
 <style scoped>
 .mdDialogContainer {
-  width: 100%;
-  height: 600px;
+   width: 100%;
+   height: 600px;
 }
 
 .mdDialogContainer .dialogTitle {
-  text-align: center;
+   text-align: center;
 }
 
 .mdDialogContainer .content {
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
+   display: flex;
+   justify-content: space-between;
+   align-items: stretch;
 }
 
 .mdDialogContainer .content .section {
-  width: 24%;
-  border: 1px solid grey;
-  border-radius: 4% 4% 0 0;
-  padding: 15px;
+   width: 24%;
+   border: 1px solid grey;
+   border-radius: 4% 4% 0 0;
+   padding: 15px;
 }
 
 /* .mdIcon {
   display: flex;
   align-items: center;
 } */
+</style>
+
+<style>
+.mdDialogContainer .md-dialog-container {
+   max-width: 100%;
+   max-height: 100%;
+}
 </style>
