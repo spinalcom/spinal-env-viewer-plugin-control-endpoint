@@ -8,8 +8,8 @@ import Vue from "vue";
 import CreateControlEndpointContextDialog from "./createContext.vue";
 import CreateControlPointDialog from './createControlPoint.vue';
 import ConfigurationDialog from './configuration.vue';
-import LinkToRoomDialog from './linkToRoomDialog.vue';
-
+import LinkControlPointDialog from './linkControlPointDialog.vue';
+import SelectGeographicType from "./selectGeoType.vue";
 
 const dialogs = [{
     name: "createControlEndpointContextDialog",
@@ -28,7 +28,12 @@ const dialogs = [{
   },
   {
     name: "linkControlToRoomDialog",
-    vueMountComponent: Vue.extend(LinkToRoomDialog),
+    vueMountComponent: Vue.extend(LinkControlPointDialog),
+    parentContainer: document.body
+  },
+  {
+    name: "cp_selectGeographicType",
+    vueMountComponent: Vue.extend(SelectGeographicType),
     parentContainer: document.body
   }
 ]
