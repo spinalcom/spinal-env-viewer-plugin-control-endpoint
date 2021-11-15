@@ -23,78 +23,72 @@ with this file. If not, see
 -->
 
 <template>
-	<md-dialog :md-active.sync="showDialog" @md-closed="closeDialog(false)">
-		<md-dialog-title class="_dialogTitle"
-			>Create Control Point Context</md-dialog-title
-		>
+  <md-dialog :md-active.sync="showDialog"
+             @md-closed="closeDialog(false)">
+    <md-dialog-title class="_dialogTitle">Create Control Point Context
+    </md-dialog-title>
 
-		<md-dialog-content>
-			<md-field>
-				<label>Context name</label>
-				<md-input v-model="name"></md-input>
-			</md-field>
-		</md-dialog-content>
+    <md-dialog-content>
+      <md-field>
+        <label>Context name</label>
+        <md-input v-model="name"></md-input>
+      </md-field>
+    </md-dialog-content>
 
-		<md-dialog-actions>
-			<md-button class="md-primary" @click="closeDialog(false)"
-				>Cancel</md-button
-			>
-			<md-button
-				class="md-primary"
-				@click="closeDialog(true)"
-				:disabled="disabled()"
-				>OK</md-button
-			>
-		</md-dialog-actions>
-	</md-dialog>
+    <md-dialog-actions>
+      <md-button class="md-primary"
+                 @click="closeDialog(false)">Cancel</md-button>
+      <md-button class="md-primary"
+                 @click="closeDialog(true)"
+                 :disabled="disabled()">OK</md-button>
+    </md-dialog-actions>
+  </md-dialog>
 </template>
 
 <script>
-	import { spinalControlPointService } from "spinal-env-viewer-plugin-control-endpoint-service";
+import { spinalControlPointService } from "spinal-env-viewer-plugin-control-endpoint-service";
 
-	export default {
-		name: "createControlEndpointContextDialog",
-		props: ["onFinised"],
-		data() {
-			return {
-				name: "",
-				showDialog: true,
-				callback: undefined,
-			};
-		},
-		mounted() {},
-		methods: {
-			opened(option) {
-				if (option.callback) {
-					this.callback = option.callback;
-				}
-			},
-			async removed(option) {
-				if (option) {
-					spinalControlPointService
-						.createContext(this.name.trim())
-						.then((el) => {
-							if (this.callback && typeof this.callback === "function") {
-								this.callback(el.get());
-							}
-						});
-				}
-				this.showDialog = false;
-			},
-			closeDialog(closeResult) {
-				if (typeof this.onFinised === "function") {
-					this.onFinised(closeResult);
-				}
-			},
-			disabled() {
-				return !(this.name && this.name.trim().length > 0);
-			},
-		},
-	};
+export default {
+  name: "createControlEndpointContextDialog",
+  props: ["onFinised"],
+  data() {
+    return {
+      name: "",
+      showDialog: true,
+      callback: undefined,
+    };
+  },
+  mounted() {},
+  methods: {
+    opened(option) {
+      if (option.callback) {
+        this.callback = option.callback;
+      }
+    },
+    async removed(option) {
+      if (option) {
+        spinalControlPointService.createContext(this.name.trim()).then((el) => {
+          if (this.callback && typeof this.callback === "function") {
+            this.callback(el.get());
+          }
+        });
+      }
+      this.showDialog = false;
+    },
+    closeDialog(closeResult) {
+      if (typeof this.onFinised === "function") {
+        this.onFinised(closeResult);
+      }
+    },
+    disabled() {
+      return !(this.name && this.name.trim().length > 0);
+    },
+  },
+};
 </script>
 
 <style scoped>
-	._dialogTitle {
-		text-align: center;
-	}
+._dialogTitle {
+  text-align: center;
+}
 </style>
