@@ -1,5 +1,6 @@
-import './createContext';
+import "./createContext";
 import "./createControlPoint";
-import './controlPointDetail';
-import './linkControlPoint';
-import './seeHeatmap';
+import "./controlPointDetail";
+import "./linkControlPoint";
+import "./seeHeatmap";
+import "./unLinkControlPoint";
