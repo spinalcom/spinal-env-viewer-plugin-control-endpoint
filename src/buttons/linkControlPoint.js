@@ -62,7 +62,7 @@ class LinkControlPointToGroup extends SpinalContextApp {
     const isGeographicContext = contextType === CONTEXT_TYPE;
 
     if (!isGeographicContext) {
-      const type = getGroupType.getGroupType(contextType);
+      const type = utilities.getGroupType(contextType);
       return openDialog(contextId, nodeId, type);
     } else {
       spinalPanelManagerService.openPanel("cp_selectGeographicType", {

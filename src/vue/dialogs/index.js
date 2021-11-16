@@ -7,7 +7,7 @@ import CreateControlPointDialog from "./createControlPoint.vue";
 import ConfigurationDialog from "./configuration.vue";
 import LinkControlPointDialog from "./linkControlPointDialog.vue";
 import SelectGeographicType from "./selectGeoType.vue";
-import UnLinkControlPointDialog from "./unLinkControlPointDialog.vue";
+// import UnLinkControlPointDialog from "./unLinkControlPointDialog.vue";
 
 const dialogs = [
   {
@@ -36,11 +36,11 @@ const dialogs = [
     parentContainer: document.body,
   },
 
-  {
-    name: "unLinkControlPointDialog",
-    vueMountComponent: Vue.extend(UnLinkControlPointDialog),
-    parentContainer: document.body,
-  },
+  // {
+  //   name: "unLinkControlPointDialog",
+  //   vueMountComponent: Vue.extend(UnLinkControlPointDialog),
+  //   parentContainer: document.body,
+  // },
 ];
 
 for (let index = 0; index < dialogs.length; index++) {

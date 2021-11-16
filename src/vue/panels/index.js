@@ -1,10 +1,8 @@
 import Vue from "vue";
-import {
-  SpinalForgeExtention,
-} from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
-
+import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
 
 import EditControlPointPanel from "./controlPointEdit.vue";
+import UnLinkControlpointPanel from "./unLinkControlPointPanel.vue";
 // import HeatmapPanel from "./heatmap-panel.vue";
 
 const panels = [
@@ -13,6 +11,19 @@ const panels = [
     vueMountComponent: Vue.extend(EditControlPointPanel),
     panel: {
       title: "Control Points",
+      closeBehaviour: "hide",
+    },
+    style: {
+      minWidth: "660px",
+      height: "475px",
+      left: "400px",
+    },
+  },
+  {
+    name: "UnLinkControlpointPanel",
+    vueMountComponent: Vue.extend(UnLinkControlpointPanel),
+    panel: {
+      title: "Unlink Control Point to group",
       closeBehaviour: "hide",
     },
     style: {
@@ -37,7 +48,6 @@ const panels = [
   //   },
   // }
 ];
-
 
 for (const element of panels) {
   const panelExtension = SpinalForgeExtention.createExtention(element);

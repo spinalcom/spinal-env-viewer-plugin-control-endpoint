@@ -41,13 +41,13 @@ class UnLinkControlPointToGroup extends SpinalContextApp {
   }
 
   action(option) {
-    const nodeId = option.selectedNode.id.get();
-    const contextId = option.context.id.get();
+    // const nodeId = option.selectedNode.id.get();
+    // const contextId = option.context.id.get();
 
-    spinalPanelManagerService.openPanel("unLinkControlPointDialog", {
-      nodeId,
-      contextId,
-    });
+    spinalPanelManagerService.openPanel(
+      "UnLinkControlpointPanel",
+      option.selectedNode.get()
+    );
   }
 }
 
