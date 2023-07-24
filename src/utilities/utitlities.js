@@ -1,3 +1,27 @@
+/*
+ * Copyright 2023 SpinalCom - www.spinalcom.com
+ * 
+ * This file is part of SpinalCore.
+ * 
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ * 
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ * 
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 
 import {
@@ -73,4 +97,37 @@ export default {
   getGroupType(contextType) {
     return contextType.replace(/GroupContext$/, "");
   },
+
+  async consumeBatch(promises,batchSize = 10) {
+    let index = 0;
+    const result = {fulfilled: [], failed: []};
+
+    while (index < promises.length) {
+      let endIndex = index + batchSize;
+      if (promises.length <= endIndex) endIndex = promises.length;
+      const slice = promises.slice(index, endIndex);
+      // const resProm = await Promise.all(slice.map((e) => e()));
+      // result.push(...resProm);
+      const {fulfilled, failed} = await this.getPromiseResult(
+        slice.map((e) => e())
+      );
+      result.fulfilled.push(...fulfilled);
+      result.failed.push(...failed);
+
+      index = endIndex;
+    }
+    return result;
+  },
+
+  getPromiseResult(liste) {
+    return Promise.allSettled(liste).then((result) => {
+      const obj = {fulfilled: [], failed: []};
+
+      for (const {status, value} of result) {
+        if (status === 'fulfilled') obj.fulfilled.push(value);
+        else obj.failed.push(value);
+      }
+      return obj;
+    });
+  }
 };

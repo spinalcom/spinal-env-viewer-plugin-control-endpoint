@@ -1,3 +1,27 @@
+/*
+ * Copyright 2023 SpinalCom - www.spinalcom.com
+ * 
+ * This file is part of SpinalCore.
+ * 
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ * 
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ * 
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
 import {
   SpinalContextApp,
   spinalContextMenuService,
@@ -29,28 +53,29 @@ class LinkControlPointToGroup extends SpinalContextApp {
   }
 
   isShown(option) {
-    const contextType = option.context.type.get();
-    // const isRoomGroupContext = groupManagerService.isRoomGroupContext(contextType);
+    return Promise.resolve(true);
+    // const contextType = option.context.type.get();
+    // // const isRoomGroupContext = groupManagerService.isRoomGroupContext(contextType);
 
-    // const isContextGeo = contextType === CONTEXT_TYPE;
-    // if(isContextGeo) return Promise.resolve(true);
+    // // const isContextGeo = contextType === CONTEXT_TYPE;
+    // // if(isContextGeo) return Promise.resolve(true);
 
-    const isGroupContext = groupManagerService.isContext(contextType);
+    // const isGroupContext = groupManagerService.isContext(contextType);
 
-    if (!isGroupContext) return Promise.resolve(-1);
+    // if (!isGroupContext) return Promise.resolve(-1);
 
-    const type = option.selectedNode.type.get();
+    // const type = option.selectedNode.type.get();
 
-    const isCategory = groupManagerService.isCategory(type);
-    const isGroup = groupManagerService.isGroup(type);
-    const isContext = type === contextType;
-
-    if (isCategory || isGroup || isContext) {
-      const type = utilities.getGroupType(contextType);
-      return Promise.resolve(GEOGRAPHIC_TYPES_ORDER.indexOf(type));
-    }
-
-    return Promise.resolve(-1);
+    // const isCategory = groupManagerService.isCategory(type);
+    // const isGroup = groupManagerService.isGroup(type);
+    // const isContext = type === contextType;
+// 
+    // if (isCategory || isGroup || isContext) {
+      // const type = utilities.getGroupType(contextType);
+      // return Promise.resolve(GEOGRAPHIC_TYPES_ORDER.indexOf(type));
+    // }
+// 
+    // return Promise.resolve(-1);
   }
 
   action(option) {
@@ -59,29 +84,32 @@ class LinkControlPointToGroup extends SpinalContextApp {
     const nodeId = option.selectedNode.id.get();
     const contextType = option.context.type.get();
 
-    const isGeographicContext = contextType === CONTEXT_TYPE;
 
-    if (!isGeographicContext) {
-      const type = utilities.getGroupType(contextType);
-      return openDialog(contextId, nodeId, type);
-    } else {
-      spinalPanelManagerService.openPanel("cp_selectGeographicType", {
-        type: option.selectedNode.type.get(),
-        callback: (argType) => {
-          openDialog(contextId, nodeId, argType);
-        },
-      });
-    }
+    spinalPanelManagerService.openPanel("SelectNodeToLinkToControlPointDialog", { contextId, nodeId })
+
+    // const isGeographicContext = contextType === CONTEXT_TYPE;
+
+    // if (!isGeographicContext) {
+    //   const type = utilities.getGroupType(contextType);
+    //   return openDialog(contextId, nodeId, type);
+    // } else {
+    //   spinalPanelManagerService.openPanel("cp_selectGeographicType", {
+    //     type: option.selectedNode.type.get(),
+    //     callback: (argType) => {
+    //       openDialog(contextId, nodeId, argType);
+    //     },
+    //   });
+    // }
   }
 }
 
-const openDialog = (contextId, nodeId, type) => {
-  spinalPanelManagerService.openPanel("linkControlToRoomDialog", {
-    contextId,
-    nodeId,
-    type,
-  });
-};
+// const openDialog = (contextId, nodeId, type) => {
+//   spinalPanelManagerService.openPanel("linkControlToRoomDialog", {
+//     contextId,
+//     nodeId,
+//     type,
+//   });
+// };
 
 const linkControlPointToGroup = new LinkControlPointToGroup();
 

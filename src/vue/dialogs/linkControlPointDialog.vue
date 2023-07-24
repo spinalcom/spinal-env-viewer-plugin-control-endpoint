@@ -31,6 +31,7 @@ with this file. If not, see
 		<md-dialog-title class="dialogTitle">
 			Select Controlpoint
 		</md-dialog-title>
+
 		<md-dialog-content>
 			<div class="content" v-if="state === STATES.normal">
 				<div class="section">
@@ -104,326 +105,364 @@ with this file. If not, see
 </template>
 
 <script>
-	import attributeService from "spinal-env-viewer-plugin-attribute-manager/src/services/index";
+import attributeService from "spinal-env-viewer-plugin-attribute-manager/src/services/index";
+import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import LinkToGroupTemplate from "../components/linkTogroupTemplate.vue";
+import { spinalControlPointService } from "spinal-env-viewer-plugin-control-endpoint-service";
 
-	import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
-	import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import {nodesToLink} from '../../utilities/nodeToSelect'
+import EventBus from "spinal-env-viewer-room-manager/js/event";
+import groupManagerService from 'spinal-env-viewer-plugin-group-manager-service';
+import utilities from "spinal-env-viewer-room-manager/js/utilities";
 
-	import LinkToGroupTemplate from "../components/linkTogroupTemplate.vue";
-	import { spinalControlPointService } from "spinal-env-viewer-plugin-control-endpoint-service";
+export default {
+	name: "dialogComponent",
+	components: {
+		"link-template": LinkToGroupTemplate,
+	},
+	props: ["onFinised"],
+	data() {
+		this.contextId;
+		this.nodeId;
+		this.STATES = {
+			normal: "normal",
+			loading: "loading",
+			success: "success",
+			error: "error",
+		};
+		return {
+			showDialog: true,
+			data: [],
+			groups: [],
+			categories: [],
+			controlPoints: [],
+			contextSelected: undefined,
+			categorySelected: undefined,
+			groupSelected: undefined,
+			controlPointSelected: undefined,
+			items: [],
+			// type: undefined,
+			// callback: undefined,
+			config: undefined,
+			state: this.STATES.normal,
+		};
+	},
 
-	import EventBus from "spinal-env-viewer-room-manager/js/event";
+	mounted() {
+		EventBus.$on("itemCreated", (id) => {
+			this.getAllData();
+		});
+	},
 
-	export default {
-		name: "dialogComponent",
-		components: {
-			"link-template": LinkToGroupTemplate,
+	methods: {
+		async opened({ contextId, nodeId, config, type, callback }) {
+			// this.items = option.itemSelected;
+			this.contextId = contextId;
+			this.nodeId = nodeId;
+			this.config = config;
+
+			// this.type = type;
+			// this.callback = callback;
+			this.state = this.STATES.loading;
+
+			try {
+				await this.getAllData();
+				this.state = this.STATES.normal;
+			} catch (error) {
+				this.state = this.STATES.error;
+			}
+
+			// console.log(this.data);
 		},
-		props: ["onFinised"],
-		data() {
-			this.contextId;
-			this.nodeId;
-			this.STATES = {
-				normal: "normal",
-				loading: "loading",
-				success: "success",
-				error: "error",
-			};
-			return {
-				showDialog: true,
-				data: [],
-				groups: [],
-				categories: [],
-				controlPoints: [],
-				contextSelected: undefined,
-				categorySelected: undefined,
-				groupSelected: undefined,
-				controlPointSelected: undefined,
-				items: [],
-				type: undefined,
-				callback: undefined,
-				state: this.STATES.normal,
-			};
+
+		async link() {
+			this.state = this.STATES.loading;
+			try {
+				const node = SpinalGraphService.getInfo(this.nodeId);
+
+				if (groupManagerService.isGroup(node.type.get())) {
+					const linkDirectlyToGroup = this.config.nodeToLink === nodesToLink.directlyToNode;
+					await spinalControlPointService.linkControlPointToGroup(this.nodeId,this.contextSelected,this.controlPointSelected,linkDirectlyToGroup);
+				} else {
+					const nodeIds = await this.getNodes(this.nodeId, this.contextId, this.config);
+					const promisesFunc = nodeIds.map((id) => {
+						return () => spinalControlPointService.linkControlPointToNode(id, this.contextSelected, this.controlPointSelected);
+					})
+
+					const res = await utilities.consumeBatch(promisesFunc, 30);
+				}
+				
+
+				// if (typeof this.callback !== "undefined") {
+				// 	const context = this.data.find(
+				// 		(el) => el.id === this.contextSelected
+				// 	);
+				// 	const category = this.categories.find(
+				// 		(el) => el.id === this.categorySelected
+				// 	);
+				// 	const group = this.groups.find(
+				// 		(el) => el.id === this.groupSelected
+				// 	);
+
+				// 	this.callback(context, category, group);
+				// }
+				this.state = this.STATES.success;
+			} catch (error) {
+				console.error(error)
+				this.state = this.STATES.error;
+			}
 		},
 
-		mounted() {
-			EventBus.$on("itemCreated", (id) => {
-				this.getAllData();
+		async removed(option) {
+			// if (option) {
+			// 	// this.items.forEach((el) => {
+			// 	//   attributeService.linkItem(
+			// 	//     this.contextSelected,
+			// 	//     this.groupSelected,
+			// 	//     el.id
+			// 	//   );
+			// 	// });
+			// }
+			this.showDialog = false;
+		},
+
+		async getNodes(nodeId, contextId, config) {
+			if (config.nodeToLink === nodesToLink.directlyToNode) return [nodeId];
+
+			if (config.nodeToLink === nodesToLink.children) {
+				const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
+				return children.map(el => el.id.get());
+			}
+
+			if (config.nodeToLink === nodesToLink.type) {
+				const nodes = await SpinalGraphService.findInContextByType(nodeId, contextId, config.type);
+				return nodes.map(el => el.id.get());
+			}
+
+			return []
+
+
+			
+		},
+
+		closeDialog(closeResult) {
+			if (typeof this.onFinised === "function") {
+				this.onFinised(closeResult);
+			}
+		},
+
+		getAllData() {
+			return attributeService
+				.getAllGroupContext(spinalControlPointService.CONTROL_POINT_TYPE)
+				.then((res) => {
+					this.data = res;
+					this.updateCategory();
+					this.updateGroups();
+					this.updateControlPoints();
+				});
+		},
+
+		// getCategories() {
+		//   this.categorySelected = undefined;
+
+		//   if (this.contextSelected) {
+		//     let val = this.data.find(el => el.id === this.contextSelected);
+		//     if (val) return val.category;
+		//   }
+		//   return [];
+		// },
+		getGroups() {
+			this.groupSelected = undefined;
+
+			if (this.contextSelected && this.categorySelected) {
+				let context = this.data.find(
+					(el) => el.id === this.contextSelected
+				);
+				if (context) {
+					let category = context.category.find(
+						(el) => el.id == this.categorySelected
+					);
+
+					if (category) return category.groups;
+				}
+			}
+			return [];
+		},
+
+		// disabled() {
+		// 	return !(
+		// 		this.contextSelected &&
+		// 		this.categorySelected &&
+		// 		this.groupSelected &&
+		// 		this.controlPointSelected &&
+		// 		this.state === this.STATES.normal
+		// 	);
+		// },
+
+		createContext() {
+			spinalPanelManagerService.openPanel("createGroupContextDialog", {
+				title: "Create a Grouping Context",
+				typePreselected: spinalControlPointService.CONTROL_POINT_TYPE,
+				callback: (id) => (this.contextSelected = id),
 			});
 		},
 
-		methods: {
-			async opened({ contextId, nodeId, type, callback }) {
-				// this.items = option.itemSelected;
-				this.contextId = contextId;
-				this.nodeId = nodeId;
-
-				this.type = type;
-				this.callback = callback;
-				this.state = this.STATES.loading;
-
-				try {
-					await this.getAllData();
-					this.state = this.STATES.normal;
-				} catch (error) {
-					this.state = this.STATES.error;
-				}
-
-				// console.log(this.data);
-			},
-
-			async link() {
-				this.state = this.STATES.loading;
-				try {
-					await spinalControlPointService.linkControlPointToGroup(
-						this.nodeId,
-						this.contextSelected,
-						this.controlPointSelected
-					);
-
-					if (typeof this.callback !== "undefined") {
-						const context = this.data.find(
-							(el) => el.id === this.contextSelected
-						);
-						const category = this.categories.find(
-							(el) => el.id === this.categorySelected
-						);
-						const group = this.groups.find(
-							(el) => el.id === this.groupSelected
-						);
-
-						this.callback(context, category, group);
-					}
-					this.state = this.STATES.success;
-				} catch (error) {
-					this.state = this.STATES.error;
-				}
-			},
-
-			async removed(option) {
-				// if (option) {
-				// 	// this.items.forEach((el) => {
-				// 	//   attributeService.linkItem(
-				// 	//     this.contextSelected,
-				// 	//     this.groupSelected,
-				// 	//     el.id
-				// 	//   );
-				// 	// });
-				// }
-				this.showDialog = false;
-			},
-
-			closeDialog(closeResult) {
-				if (typeof this.onFinised === "function") {
-					this.onFinised(closeResult);
-				}
-			},
-
-			getAllData() {
-				return attributeService
-					.getAllGroupContext(spinalControlPointService.CONTROL_POINT_TYPE)
-					.then((res) => {
-						this.data = res;
-						this.updateCategory();
-						this.updateGroups();
-						this.updateControlPoints();
-					});
-			},
-
-			// getCategories() {
-			//   this.categorySelected = undefined;
-
-			//   if (this.contextSelected) {
-			//     let val = this.data.find(el => el.id === this.contextSelected);
-			//     if (val) return val.category;
-			//   }
-			//   return [];
-			// },
-			getGroups() {
-				this.groupSelected = undefined;
-
-				if (this.contextSelected && this.categorySelected) {
-					let context = this.data.find(
-						(el) => el.id === this.contextSelected
-					);
-					if (context) {
-						let category = context.category.find(
-							(el) => el.id == this.categorySelected
-						);
-
-						if (category) return category.groups;
-					}
-				}
-				return [];
-			},
-
-			// disabled() {
-			// 	return !(
-			// 		this.contextSelected &&
-			// 		this.categorySelected &&
-			// 		this.groupSelected &&
-			// 		this.controlPointSelected &&
-			// 		this.state === this.STATES.normal
-			// 	);
-			// },
-
-			createContext() {
-				spinalPanelManagerService.openPanel("createGroupContextDialog", {
-					title: "Create a Grouping Context",
-					typePreselected: spinalControlPointService.CONTROL_POINT_TYPE,
-					callback: (id) => (this.contextSelected = id),
-				});
-			},
-
-			createCategory() {
-				spinalPanelManagerService.openPanel("createCategoryDialog", {
-					title: "add Category",
-					contextId: this.contextSelected,
-					selectedNode: SpinalGraphService.getInfo(this.contextSelected),
-					callback: (id) => (this.categorySelected = id),
-				});
-			},
-
-			createGroup() {
-				spinalPanelManagerService.openPanel("createGroupDialog", {
-					title: "add Group",
-					contextId: this.contextSelected,
-					selectedNode: SpinalGraphService.getInfo(this.categorySelected),
-					callback: (id) => (this.groupSelected = id),
-				});
-			},
-
-			//////////////////////////////////////////////////////////////////
-			// Updates
-			//////////////////////////////////////////////////////////////////
-
-			updateCategory() {
-				// this.categorySelected = undefined;
-				this.categories = [];
-				if (this.contextSelected) {
-					let val = this.data.find((el) => el.id === this.contextSelected);
-					if (val) this.categories = val.category;
-				}
-			},
-
-			updateGroups() {
-				// this.groupSelected = undefined;
-				this.groups = [];
-				if (this.contextSelected && this.categorySelected) {
-					let context = this.data.find(
-						(el) => el.id === this.contextSelected
-					);
-					if (context) {
-						let category = context.category.find(
-							(el) => el.id == this.categorySelected
-						);
-
-						if (category) this.groups = category.groups;
-					}
-				}
-			},
-
-			async updateControlPoints() {
-				this.controlPoints = [];
-				if (
-					this.contextSelected &&
-					this.categorySelected &&
-					this.groupSelected
-				) {
-					const res = await spinalControlPointService.getControlPoint(
-						this.groupSelected
-					);
-					this.controlPoints = res.map((el) => el.get());
-				}
-			},
-
-			//////////////////////////////////////////////////////////////////
-			// Select
-			//////////////////////////////////////////////////////////////////
-
-			selectContext(id) {
-				if (this.contextSelected === id) {
-					this.contextSelected = undefined;
-					return;
-				}
-				this.contextSelected = id;
-			},
-
-			selectCategory(id) {
-				if (this.categorySelected === id) {
-					this.categorySelected = undefined;
-					return;
-				}
-				this.categorySelected = id;
-			},
-
-			selectGroup(id) {
-				if (this.groupSelected === id) {
-					this.groupSelected = undefined;
-					return;
-				}
-				this.groupSelected = id;
-			},
-
-			selectControlPoint(id) {
-				if (this.controlPointSelected === id) {
-					this.controlPointSelected = undefined;
-					return;
-				}
-				this.controlPointSelected = id;
-			},
+		createCategory() {
+			spinalPanelManagerService.openPanel("createCategoryDialog", {
+				title: "add Category",
+				contextId: this.contextSelected,
+				selectedNode: SpinalGraphService.getInfo(this.contextSelected),
+				callback: (id) => (this.categorySelected = id),
+			});
 		},
-		computed: {
-			disabled() {
-				return !(
-					this.contextSelected &&
-					this.categorySelected &&
-					this.groupSelected &&
-					this.controlPointSelected &&
-					this.state === this.STATES.normal
+
+		createGroup() {
+			spinalPanelManagerService.openPanel("createGroupDialog", {
+				title: "add Group",
+				contextId: this.contextSelected,
+				selectedNode: SpinalGraphService.getInfo(this.categorySelected),
+				callback: (id) => (this.groupSelected = id),
+			});
+		},
+
+		//////////////////////////////////////////////////////////////////
+		// Updates
+		//////////////////////////////////////////////////////////////////
+
+		updateCategory() {
+			// this.categorySelected = undefined;
+			this.categories = [];
+			if (this.contextSelected) {
+				let val = this.data.find((el) => el.id === this.contextSelected);
+				if (val) this.categories = val.category;
+			}
+		},
+
+		updateGroups() {
+			// this.groupSelected = undefined;
+			this.groups = [];
+			if (this.contextSelected && this.categorySelected) {
+				let context = this.data.find(
+					(el) => el.id === this.contextSelected
 				);
-			},
+				if (context) {
+					let category = context.category.find(
+						(el) => el.id == this.categorySelected
+					);
 
-			success() {
-				return this.state === this.STATES.success;
-			},
-			error() {
-				return this.state === this.STATES.error;
-			},
+					if (category) this.groups = category.groups;
+				}
+			}
 		},
-		watch: {
-			contextSelected() {
+
+		async updateControlPoints() {
+			this.controlPoints = [];
+			if (
+				this.contextSelected &&
+				this.categorySelected &&
+				this.groupSelected
+			) {
+				const res = await spinalControlPointService.getControlPoint(
+					this.groupSelected
+				);
+				this.controlPoints = res.map((el) => el.get());
+			}
+		},
+
+		//////////////////////////////////////////////////////////////////
+		// Select
+		//////////////////////////////////////////////////////////////////
+
+		selectContext(id) {
+			if (this.contextSelected === id) {
+				this.contextSelected = undefined;
+				return;
+			}
+			this.contextSelected = id;
+		},
+
+		selectCategory(id) {
+			if (this.categorySelected === id) {
 				this.categorySelected = undefined;
-				this.groupSelected = undefined;
-
-				this.updateCategory();
-				this.updateGroups();
-				this.updateControlPoints();
-			},
-
-			categorySelected() {
-				this.groupSelected = undefined;
-
-				this.updateGroups();
-				this.updateControlPoints();
-			},
-
-			groupSelected() {
-				this.controlPointSelected = undefined;
-				this.updateControlPoints();
-			},
+				return;
+			}
+			this.categorySelected = id;
 		},
-	};
+
+		selectGroup(id) {
+			if (this.groupSelected === id) {
+				this.groupSelected = undefined;
+				return;
+			}
+			this.groupSelected = id;
+		},
+
+		selectControlPoint(id) {
+			if (this.controlPointSelected === id) {
+				this.controlPointSelected = undefined;
+				return;
+			}
+			this.controlPointSelected = id;
+		},
+	},
+	computed: {
+		disabled() {
+			return !(
+				this.contextSelected &&
+				this.categorySelected &&
+				this.groupSelected &&
+				this.controlPointSelected &&
+				this.state === this.STATES.normal
+			);
+		},
+
+		success() {
+			return this.state === this.STATES.success;
+		},
+		error() {
+			return this.state === this.STATES.error;
+		},
+	},
+	watch: {
+		contextSelected() {
+			this.categorySelected = undefined;
+			this.groupSelected = undefined;
+
+			this.updateCategory();
+			this.updateGroups();
+			this.updateControlPoints();
+		},
+
+		categorySelected() {
+			this.groupSelected = undefined;
+
+			this.updateGroups();
+			this.updateControlPoints();
+		},
+
+		groupSelected() {
+			this.controlPointSelected = undefined;
+			this.updateControlPoints();
+		},
+	},
+};
 </script>
 
 <style scoped>
 	.mdDialogContainer {
-		width: 100%;
-		height: 600px;
+		width: 50%;
+		height: 500px;
 	}
 
 	.mdDialogContainer .dialogTitle {
 		text-align: center;
+	}
+
+	.mdDialogContainer .content {
+		height: 50px;
+		display: flex;
+		align-items: center;
 	}
 
 	.mdDialogContainer .content {

@@ -59,6 +59,10 @@ with this file. If not, see
 export default {
    name: "linkToGroupTemplate",
    props: ["data", "title", "itemSelected", "disableBtn"],
+   data() {
+      return {
+      }
+   },
    methods: {
       createEvent() {
          this.$emit("create");
