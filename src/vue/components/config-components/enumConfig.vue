@@ -23,47 +23,53 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="config_container">
-
+  <div class="enum-config-config_container">
     <md-content class="colors md-scrollbar">
-      <div class="md-layout md-gutter item"
-           v-for="item in enumeration"
-           :key="item.id">
+      <div
+        class="md-layout md-gutter item"
+        v-for="item in enumeration"
+        :key="item.id"
+      >
         <div class="md-layout-item md-size-45">
           <md-field md-inline>
-            <md-input v-model="item.name"
-                      placeholder="name"></md-input>
+            <md-input v-model="item.name" placeholder="name"></md-input>
           </md-field>
         </div>
 
         <div class="md-layout-item md-size-45">
           <!-- <span class="md-caption">Color</span> -->
           <div class="colorContainer">
-            <div class="current-color"
-                 :style="'background-color: ' + item.color"
-                 @click="togglePicker(item.id)"></div>
-            <chrome-picker v-if="display[item.id]"
-                           class="colorSelect"
-                           v-model="item.color"
-                           @input="(val) => updateColor(item,val)" />
+            <div
+              class="current-color"
+              :style="'background-color: ' + item.color"
+              @click="togglePicker(item.id)"
+            ></div>
+            <chrome-picker
+              v-if="display[item.id]"
+              class="colorSelect"
+              v-model="item.color"
+              @input="(val) => updateColor(item, val)"
+            />
           </div>
         </div>
       </div>
     </md-content>
 
-    <md-button class="md-fab md-mini md-primary md-fab-bottom-right"
-               @click="addColor">
+    <md-button
+      class="md-fab md-mini md-primary md-fab-bottom-right"
+      @click="addColor"
+    >
       <md-icon>add</md-icon>
     </md-button>
   </div>
 </template>
 
 <script>
-import { Chrome } from "vue-color";
+import { Chrome } from 'vue-color';
 
 export default {
-  name: "enumConfigTemplate",
-  components: { "chrome-picker": Chrome },
+  name: 'enumConfigTemplate',
+  components: { 'chrome-picker': Chrome },
   props: {
     config: {},
   },
@@ -83,7 +89,7 @@ export default {
     addColor() {
       this.enumeration = [
         ...this.enumeration,
-        { name: "", color: "#000000", id: Date.now() },
+        { name: '', color: '#000000', id: Date.now() },
       ];
     },
     togglePicker(val) {
@@ -96,39 +102,39 @@ export default {
 </script>
 
 <style scoped>
-.config_container {
+.enum-config-config_container {
   width: 90%;
   height: 100%;
   margin: auto;
 }
 
-.config_container .colors {
+.enum-config-config_container .colors {
   width: 100%;
   height: 100%;
   overflow: auto;
 }
 
-.config_container .colors .item {
+.enum-config-config_container .colors .item {
   width: 100%;
   display: flex;
   justify-content: space-around;
 }
 
-.config_container .colorContainer {
+.enum-config-config_container .colorContainer {
   width: 100%;
   height: 30px;
 }
 
-.config_container .colorSelect {
+.enum-config-config_container .colorSelect {
   width: 100%;
 }
 
-.config_container .colorContainer .current-color {
+.enum-config-config_container .colorContainer .current-color {
   width: 100%;
   height: 80%;
 }
 
-.config_container .colorContainer .current-color:hover {
+.enum-config-config_container .colorContainer .current-color:hover {
   cursor: pointer;
 }
 </style>

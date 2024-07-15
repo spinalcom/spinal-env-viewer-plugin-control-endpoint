@@ -23,53 +23,62 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="config_container">
+  <div class="boolean-config-config_container">
     <div class="values md-layout md-gutter">
       <div class="md-layout-item md-size-50">
         <span class="md-caption">False</span>
         <div class="colorContainer">
-          <div class="current-color"
-               :style="'background-color: ' + config.min.color"
-               @click="togglePicker('min')"></div>
-          <chrome-picker class="colorSelect"
-                         v-model="config.min.color"
-                         v-if="display.min"
-                         @input="updateMinColor" />
+          <div
+            class="current-color"
+            :style="'background-color: ' + config.min.color"
+            @click="togglePicker('min')"
+          ></div>
+          <chrome-picker
+            class="colorSelect"
+            v-model="config.min.color"
+            v-if="display.min"
+            @input="updateMinColor"
+          />
         </div>
       </div>
 
       <div class="md-layout-item md-size-50">
         <span class="md-caption">True</span>
         <div class="colorContainer">
-          <div class="current-color"
-               :style="'background-color: ' + config.max.color"
-               @click="togglePicker('max')"></div>
-          <chrome-picker class="colorSelect"
-                         v-model="config.max.color"
-                         v-if="display.max"
-                         @input="updateMaxColor" />
+          <div
+            class="current-color"
+            :style="'background-color: ' + config.max.color"
+            @click="togglePicker('max')"
+          ></div>
+          <chrome-picker
+            class="colorSelect"
+            v-model="config.max.color"
+            v-if="display.max"
+            @input="updateMaxColor"
+          />
         </div>
       </div>
-
     </div>
 
     <div class="colorGradient">
-      <div v-for="(g,index) in gradient"
-           :key="index"
-           v-tooltip="getColorValue(index)"
-           :style="'background-color: #' + g.toHex()">
+      <div
+        v-for="(g, index) in gradient"
+        :key="index"
+        v-tooltip="getColorValue(index)"
+        :style="'background-color: #' + g.toHex()"
+      >
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Chrome } from "vue-color";
-import { color } from "../../../utilities/color";
+import { Chrome } from 'vue-color';
+import { color } from '../../../utilities/color';
 
 export default {
-  name: "NumberConfigTemplate",
-  components: { "chrome-picker": Chrome },
+  name: 'NumberConfigTemplate',
+  components: { 'chrome-picker': Chrome },
   props: {
     config: {},
   },
@@ -136,52 +145,52 @@ export default {
         return `${begin + min} - ${end + min}`;
       }
 
-      return "-";
+      return '-';
     },
   },
 };
 </script>
 
 <style scoped>
-.config_container {
+.boolean-config-config_container {
   width: 90%;
   height: 100%;
   margin: auto;
 }
 
-.config_container .values {
+.boolean-config-config_container .values {
   height: 60%;
 }
 
-.config_container {
+.boolean-config-config_container {
   width: 90%;
   height: 100%;
   margin: auto;
 }
 
-.config_container .values {
+.boolean-config-config_container .values {
   height: 60%;
 }
 
-.config_container .colorSelect {
+.boolean-config-config_container .colorSelect {
   width: 100%;
 }
 
-.config_container .colorContainer {
+.boolean-config-config_container .colorContainer {
   width: 100%;
   height: 30px;
 }
 
-.config_container .colorContainer .current-color {
+.boolean-config-config_container .colorContainer .current-color {
   width: 100%;
   height: 80%;
 }
 
-.config_container .colorContainer .current-color:hover {
+.boolean-config-config_container .colorContainer .current-color:hover {
   cursor: pointer;
 }
 
-.config_container .colorGradient {
+.boolean-config-config_container .colorGradient {
   width: 100%;
   height: 20px;
   margin-bottom: 20px;
@@ -190,14 +199,14 @@ export default {
   margin-top: 100px;
 }
 
-.config_container .colorGradient div {
+.boolean-config-config_container .colorGradient div {
   flex-grow: 1;
   position: relative;
   text-align: center;
   color: black;
 }
 
-.config_container .colorGradient div:hover {
+.boolean-config-config_container .colorGradient div:hover {
   cursor: pointer;
 }
 

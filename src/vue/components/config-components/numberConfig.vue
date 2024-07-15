@@ -23,84 +23,103 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="config_container">
+  <div class="number-config-config_container">
     <div class="values md-layout md-gutter">
       <div class="md-layout-item md-size-33">
         <span class="md-caption">Min</span>
         <md-field md-inline>
-          <md-input type="number"
-                    @change="calculateAverage"
-                    v-model="config.min.value"></md-input>
+          <md-input
+            type="number"
+            @change="calculateAverage"
+            v-model="config.min.value"
+          ></md-input>
         </md-field>
         <span class="md-caption">Color</span>
         <div class="colorContainer">
-          <div class="current-color"
-               :style="'background-color: ' + config.min.color"
-               @click="togglePicker('min')"></div>
-          <chrome-picker class="colorSelect"
-                         v-model="config.min.color"
-                         v-if="display.min"
-                         @input="updateMinColor" />
+          <div
+            class="current-color"
+            :style="'background-color: ' + config.min.color"
+            @click="togglePicker('min')"
+          ></div>
+          <chrome-picker
+            class="colorSelect"
+            v-model="config.min.color"
+            v-if="display.min"
+            @input="updateMinColor"
+          />
         </div>
       </div>
 
       <div class="md-layout-item md-size-33">
         <span class="md-caption">Average</span>
         <md-field md-inline>
-          <md-input type="number"
-                    disabled
-                    v-model="config.average.value"></md-input>
+          <md-input
+            type="number"
+            disabled
+            v-model="config.average.value"
+          ></md-input>
         </md-field>
         <span class="md-caption">Color</span>
         <div class="colorContainer">
-          <div class="current-color"
-               :style="'background-color: ' + config.average.color"
-               @click="togglePicker('average')"></div>
-          <chrome-picker class="colorSelect"
-                         v-model="config.average.color"
-                         v-if="display.average"
-                         @input="updateAverageColor" />
+          <div
+            class="current-color"
+            :style="'background-color: ' + config.average.color"
+            @click="togglePicker('average')"
+          ></div>
+          <chrome-picker
+            class="colorSelect"
+            v-model="config.average.color"
+            v-if="display.average"
+            @input="updateAverageColor"
+          />
         </div>
       </div>
 
       <div class="md-layout-item md-size-33">
         <span class="md-caption">Max</span>
         <md-field md-inline>
-          <md-input type="number"
-                    @change="calculateAverage"
-                    v-model="config.max.value"></md-input>
+          <md-input
+            type="number"
+            @change="calculateAverage"
+            v-model="config.max.value"
+          ></md-input>
         </md-field>
         <span class="md-caption">Color</span>
         <div class="colorContainer">
-          <div class="current-color"
-               :style="'background-color: ' + config.max.color"
-               @click="togglePicker('max')"></div>
-          <chrome-picker class="colorSelect"
-                         v-model="config.max.color"
-                         v-if="display.max"
-                         @input="updateMaxColor" />
+          <div
+            class="current-color"
+            :style="'background-color: ' + config.max.color"
+            @click="togglePicker('max')"
+          ></div>
+          <chrome-picker
+            class="colorSelect"
+            v-model="config.max.color"
+            v-if="display.max"
+            @input="updateMaxColor"
+          />
         </div>
       </div>
-
     </div>
 
     <div class="colorGradient">
-      <div v-for="(g,index) in gradient"
-           :key="index"
-           v-tooltip="getColorValue(index)"
-           :style="'background-color: #' + g.toHex()">
+      <div
+        v-for="(g, index) in gradient"
+        :key="index"
+        v-tooltip="getColorValue(index)"
+        :style="'background-color: #' + g.toHex()"
+      >
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Chrome } from "vue-color";
-import { color } from "../../../utilities/color";
+import { Chrome } from 'vue-color';
+import { color } from '../../../utilities/color';
 
 export default {
-  name: "NumberConfigTemplate",
-  components: { "chrome-picker": Chrome },
+  name: 'NumberConfigTemplate',
+  components: { 'chrome-picker': Chrome },
   props: {
     config: {},
   },
@@ -167,42 +186,42 @@ export default {
         return `${begin + min} - ${end + min}`;
       }
 
-      return "-";
+      return '-';
     },
   },
 };
 </script>
 
 <style scoped>
-.config_container {
+.number-config-config_container {
   width: 90%;
   height: 100%;
   margin: auto;
 }
 
-.config_container .values {
+.number-config-config_container .values {
   height: 60%;
 }
 
-.config_container .colorSelect {
+.number-config-config_container .colorSelect {
   width: 100%;
 }
 
-.config_container .colorContainer {
+.number-config-config_container .colorContainer {
   width: 100%;
   height: 30px;
 }
 
-.config_container .colorContainer .current-color {
+.number-config-config_container .colorContainer .current-color {
   width: 100%;
   height: 80%;
 }
 
-.config_container .colorContainer .current-color:hover {
+.number-config-config_container .colorContainer .current-color:hover {
   cursor: pointer;
 }
 
-.config_container .colorGradient {
+.number-config-config_container .colorGradient {
   width: 100%;
   height: 20px;
   margin-bottom: 20px;
@@ -211,14 +230,14 @@ export default {
   margin-top: 100px;
 }
 
-.config_container .colorGradient div {
+.number-config-config_container .colorGradient div {
   flex-grow: 1;
   position: relative;
   text-align: center;
   color: black;
 }
 
-.config_container .colorGradient div:hover {
+.number-config-config_container .colorGradient div:hover {
   cursor: pointer;
 }
 
